@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 
 class EnhancedGazeTracker:
     def __init__(self):
+        self.frame = None
         self.gaze = GazeTrackingMediaPipe()
         self.webcam = cv2.VideoCapture(0)
         self.webcam.set(cv2.CAP_PROP_FPS, 30)  # Set webcam frame rate to 30 FPS
@@ -147,17 +148,25 @@ class EnhancedGazeTracker:
         plt.savefig(filename)
         print(f"Delta plot saved to {filename}")
 
-    def run(self):
+    def run(self,frame = None):
         cv2.namedWindow("Gaze Tracking", cv2.WINDOW_NORMAL)
+        cv2.setWindowProperty(
+            "Gaze Tracking", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN
+        )
+
         pyautogui.FAILSAFE = False
 
-
-
-        while True:
+        screen_x, screen_y = None, None
+        while self.calibrating:
             ret, frame = self.webcam.read()
             if not ret:
-                break
-
+                # break
+                return
+            camera_matrix = np.array([[400, 0, 540],
+                                      [0, 400, 540],
+                                      [0, 0, 1]])
+            dist_coeffs = np.array([[0, 0, 0, 0, 1]])
+            frame = cv2.undistort(frame, camera_matrix, dist_coeffs)
             self.gaze.refresh(frame)
             frame = self.gaze.annotated_frame()
 
@@ -169,7 +178,7 @@ class EnhancedGazeTracker:
                     if self.gaze.pupils_located:
                         h_ratio = self.gaze.horizontal_ratio()
                         v_ratio = self.gaze.vertical_ratio()
-                        # print( f"Captured calibration point {self.current_calibration_point}: gaze=({h_ratio:.3f}, {v_ratio:.3f})")
+                            # print( f"Captured calibration point {self.current_calibration_point}: gaze=({h_ratio:.3f}, {v_ratio:.3f})")
                         if h_ratio is not None and v_ratio is not None:
                             self.calibration_data.append({
                                 'gaze': (h_ratio, v_ratio),
@@ -179,48 +188,49 @@ class EnhancedGazeTracker:
                             if self.current_calibration_point >= len(self.calibration_points):
                                 self.calculate_mapping()
                                 self.calibrating = False
-            else:
-                if self.star_time is None:
-                    self.star_time = time.time()
-                x_dot, y_dot = self.metric(frame)
-                t = time.time() - self.star_time
-                if self.gaze.pupils_located:
-                    h_ratio = self.gaze.horizontal_ratio()
-                    v_ratio = self.gaze.vertical_ratio()
-                    if h_ratio is not None and v_ratio is not None:
+            # else:
+            #     if self.star_time is None:
+            #         self.star_time = time.time()
+            #         # x_dot, y_dot = self.metric(frame)
+            #         # t = time.time() - self.star_time
+        if self.gaze.pupils_located:
+            h_ratio = self.gaze.horizontal_ratio()
+            v_ratio = self.gaze.vertical_ratio()
+            if h_ratio is not None and v_ratio is not None:
 
-                        # Smooth the gaze data
-                        h_ratio, v_ratio = self.smooth_gaze(h_ratio, v_ratio)
-                        # Map gaze to screen coordinates using the homography
-                        screen_x, screen_y = self.map_to_screen(h_ratio, v_ratio)
-                        # Move the mouse pointer
-                        pyautogui.moveTo(screen_x, screen_y)
-                        # Draw the gaze point on the frame for visualization
-                        cv2.circle(frame, (screen_x, screen_y), 15, (0, 0, 255), -1)
+                            # Smooth the gaze data
+                h_ratio, v_ratio = self.smooth_gaze(h_ratio, v_ratio)
+                            # Map gaze to screen coordinates using the homography
+                screen_x, screen_y = self.map_to_screen(h_ratio, v_ratio)
+                            # Move the mouse pointer
+                pyautogui.moveTo(screen_x, screen_y)
+                            # Draw the gaze point on the frame for visualization
+                cv2.circle(frame, (screen_x, screen_y), 15, (0, 0, 255), -1)
 
-                        self.timestamps.append(t)
-                        self.dot_positions.append((x_dot, y_dot))
-                        self.gaze_positions.append((screen_x, screen_y))
+                        # self.timestamps.append(t)
+                        # self.dot_positions.append((x_dot, y_dot))
+                        # self.gaze_positions.append((screen_x, screen_y))
 
-            cv2.imshow("Gaze Tracking", frame)
-            key = cv2.waitKey(1)
-            if key == 27:  # ESC to exit
-                break
-            elif key == ord('r'):  # Reset calibration
+        cv2.imshow("Gaze Tracking", frame)
+        key = cv2.waitKey(1)
+        if key == 27:  # ESC to exit
+                # break
+            return screen_x, screen_y
+        elif key == ord('r'):  # Reset calibration
                 # Reset all
-                self.calibrating = True
-                self.current_calibration_point = 0
-                self.calibration_data.clear()
-                self.calibration_complete = False
-                self.gaze_history.clear()
-                self.anim_start_time = None
-                self.timestamps.clear()
-                self.dot_positions.clear()
-                self.gaze_positions.clear()
-        self.plot_and_save()
+            self.calibrating = True
+            self.current_calibration_point = 0
+            self.calibration_data.clear()
+            self.calibration_complete = False
+            self.gaze_history.clear()
+            self.anim_start_time = None
+            self.timestamps.clear()
+            self.dot_positions.clear()
+            self.gaze_positions.clear()
+        # self.plot_and_save()
         self.webcam.release()
-        cv2.destroyAllWindows()
-
+        # cv2.destroyAllWindows()
+        return screen_x, screen_y
     # def toggle_pause_play(self):
     #     """Toggle between pause and play states."""
     #     if self.is_playing:
@@ -231,6 +241,6 @@ class EnhancedGazeTracker:
     #         pyautogui.press('space')  # Simulate spacebar press to play
     #         self.is_playing = True
     #         print("Playing")
-
+#
 tracker = EnhancedGazeTracker()
-tracker.run()
+print(tracker.run())

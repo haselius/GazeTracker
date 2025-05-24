@@ -19,6 +19,7 @@ class Eye(object):
         # Calculate eye region coordinates
         self.x, self.y = self._get_min_coordinates()
         self.w, self.h = self._get_max_dimensions()
+        #shift
 
         # Calculate pupil position as iris center
         self.pupil = self._calculate_pupil_position()
@@ -28,8 +29,11 @@ class Eye(object):
                 min(pt[1] for pt in self.landmarks))
 
     def _get_max_dimensions(self):
-        return (max(pt[0] for pt in self.landmarks) - self.x,
-                max(pt[1] for pt in self.landmarks) - self.y)
+        #forsing it make it square
+        width = max(pt[0] for pt in self.landmarks) - self.x
+        height = max(pt[1] for pt in self.landmarks) - self.y
+        size = max(width, height)
+        return size, size  # force square
 
     def _calculate_pupil_position(self):
         # Use iris landmarks to find center
@@ -54,8 +58,9 @@ class GazeTrackingMediaPipe(object):
         self.CLOSE_LEFT = [33, 160, 158, 133, 153, 144]
         self.CLOSE_RIGHT = [362, 385, 387, 263, 373, 380]
         # MediaPipe face landmark indices
-        self.LEFT_EYE = [362, 263, 385, 380]
-        self.RIGHT_EYE = [33, 133, 160, 144]
+        self.LEFT_EYE = [33, 133, 246, 161]
+        self.RIGHT_EYE = [362, 263, 466, 388]
+
         self.LEFT_IRIS = [474, 475, 476, 477]
         self.RIGHT_IRIS = [469, 470, 471, 472]
 
@@ -155,7 +160,7 @@ class GazeTrackingMediaPipe(object):
             # Draw eye regions
             for eye in [self.eye_left, self.eye_right]:
                 x, y, w, h = eye.x, eye.y, eye.w, eye.h
-                cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 1)
+                cv2.rectangle(frame, (x, y - h//2), (x + w, y + h//2), (0, 255, 0), 1)
 
                 # Draw pupil position
                 pupil_x = x + eye.pupil[0]
