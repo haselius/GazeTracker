@@ -14,3 +14,6 @@ How to Run
 
     gaze_tracking/init.py
     Connects the different components of the module.
+
+    gaze_tracking/NikitaSketch.py
+    Main estimation script
