@@ -11,6 +11,7 @@ import matplotlib.pyplot as plt
 class EnhancedGazeTracker:
     def __init__(self):
         self.frame = None
+        self.coefs = []
         self.gaze = GazeTrackingMediaPipe()
         self.webcam = cv2.VideoCapture(0)
         self.webcam.set(cv2.CAP_PROP_FPS, 30)  # Set webcam frame rate to 30 FPS
@@ -79,6 +80,9 @@ class EnhancedGazeTracker:
         self.x_coeff = np.polyfit(gaze_x, screen_x, 2)
         self.y_coeff = np.polyfit(gaze_y, screen_y, 2)
         self.calibration_complete = True
+        self.coefs = [x_coeff, y_coeff]
+        print(self.coefs)
+        np.save('calib_data.npz', np.array(self.coefs))
 
     def map_to_screen(self, h_ratio, v_ratio):
         """Map gaze ratios to screen coordinates using calibration"""

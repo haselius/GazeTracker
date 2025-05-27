@@ -75,9 +75,9 @@ def main():
     fps_frame = FPS().start()
 
     cap = cv2.VideoCapture(0)#, cv2.CAP_DSHOW)
-    cap.set(cv2.CAP_PROP_AUTOFOCUS, 0)
-    cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
-    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
+    # cap.set(cv2.CAP_PROP_AUTOFOCUS, 0)
+    # cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
+    # cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
 
     camera_matrix = np.array([[400, 0, 540],
                               [0,400,540],
@@ -96,11 +96,11 @@ def main():
             break
 
         # print(tracker.calibrating)
-        frame = cv2.undistort(frame, camera_matrix, dist_coeffs)
+        # frame = cv2.undistort(frame, camera_matrix, dist_coeffs)
         x_hat, y_hat = tracker.run(frame)
-        if x_hat == None:
-            print("None from the run")
-            break
+        # if x_hat == None:
+        #     print("None from the run")
+        #     break
 
         ### you method here ###
 

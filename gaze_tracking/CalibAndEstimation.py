@@ -10,12 +10,12 @@ class EnhancedGazeTracker:
         # Initialize gaze, camera, and screen parameters
         self.gaze = GazeTrackingMediaPipe()
         self.webcam = cv2.VideoCapture(0)
-        self.webcam.set(cv2.CAP_PROP_FPS, 30)
-        self.webcam.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
-        self.webcam.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
+        # self.webcam.set(cv2.CAP_PROP_FPS, 30)
+        # self.webcam.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
+        # self.webcam.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
 
-
-        self.screen_width, self.screen_height = 2560, 1440
+        self.coefs = []
+        self.screen_width, self.screen_height = 1920, 1080 #2560, 1440
 
         # Calibration params
         self.calibration_points = [(0.2, 0.2), (0.5, 0.2), (0.8, 0.2),
@@ -53,6 +53,9 @@ class EnhancedGazeTracker:
         # Fit 2nd degree polynomial
         self.x_coeff = np.polyfit(gaze_x, screen_x, 2)
         self.y_coeff = np.polyfit(gaze_y, screen_y, 2)
+        self.coefs = [self.x_coeff, self.y_coeff]
+        print(self.coefs)
+        np.save('calib_data.npz', np.array(self.coefs))
         self.calibration_complete = True
 
     def smooth_gaze(self, h_ratio, v_ratio):
@@ -89,10 +92,10 @@ class EnhancedGazeTracker:
         cv2.namedWindow("GazeTracker", cv2.WINDOW_NORMAL)
         cv2.setWindowProperty("GazeTracker", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
         pyautogui.FAILSAFE = False
-        camera_matrix = np.array([[400, 0, 540],
-                                  [0, 400, 540],
-                                  [0, 0, 1]])
-        dist_coeffs = np.array([[0, 0, 0, 0, 1]])
+        # camera_matrix = np.array([[400, 0, 540],
+        #                           [0, 400, 540],
+        #                           [0, 0, 1]])
+        # dist_coeffs = np.array([[0, 0, 0, 0, 1]])
         # Calibration loop
         while self.calibrating:
             ret, frame = self.webcam.read()
