@@ -18,9 +18,10 @@ class EnhancedGazeTracker:
         self.screen_width, self.screen_height = 1920, 1080 #2560, 1440
 
         # Calibration params
-        self.calibration_points = [ (0.1, 0.1), (0.5, 0.1), (0.9, 0.1),
-                                    (0.1, 0.5), (0.5, 0.5), (0.9, 0.5),
-                                    (0.1, 0.9), (0.5, 0.9), (0.9, 0.9)]
+        xs = np.linspace(0.05, 0.95, 4)
+        ys = np.linspace(0.05, 0.95, 5)
+        self.calibration_points = [(x, y) for y in ys for x in xs]
+        
         self.calibration_data = []
         self.current_calibration_index = 0
         self.calibrating = True
@@ -36,7 +37,7 @@ class EnhancedGazeTracker:
         y = int(point[1] * frame.shape[0])
 
         # Draw calibration point
-        cv2.circle(frame, (x, y), 15, (0, 255, 0), 2)
+        cv2.circle(frame, (x, y), 8, (0, 255, 0), 2)
         cv2.putText(frame, f"Look at the circle ({self.current_calibration_index + 1}/{len(self.calibration_points)})",
                     (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
         cv2.putText(frame, "Press SPACE when ready", (50, 80), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)

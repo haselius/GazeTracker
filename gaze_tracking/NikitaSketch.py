@@ -10,7 +10,7 @@ import random
 from imutils.video import FPS
 import csv
 from CalibAndEstimation import EnhancedGazeTracker
-
+from KalmanHelper import KalmanFilterWrapper
 def analyze_error_in_pogs(dir, id, pred_x, pred_y, lab_x, lab_y, average_intensity):
 
     with open(os.path.join(dir, "pogs_analyze_sample.csv"), "a", newline="") as csv_file:
@@ -37,6 +37,8 @@ def main():
     time_name = datetime.datetime.now().strftime("%I_%M%p_%B_%d_%Y")
     tracker = EnhancedGazeTracker()
     tracker.Calibrun()
+    # Initiallize Klalman Filter for better smoothing
+    kalman_filter = KalmanFilterWrapper()
     cv2.namedWindow("over", cv2.WINDOW_NORMAL)
     cv2.setWindowProperty(
         "over", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN
@@ -94,6 +96,7 @@ def main():
         # print(tracker.calibrating)
         # frame = cv2.undistort(frame, camera_matrix, dist_coeffs)
         x_hat, y_hat = tracker.run(frame)
+        x_filtered, y_filtered = kalman_filter.correct_and_predict(x_hat, y_hat)
         # if x_hat == None:
         #     print("None from the run")
         #     break
@@ -105,8 +108,8 @@ def main():
         main_screen = white_frame
         overlay = main_screen.copy()
 
-        track_x.append(x_hat)
-        track_y.append(y_hat)
+        track_x.append(x_filtered)
+        track_y.append(y_filtered)
 
         weights = np.arange(1, num_of_points + 1)
         cv2.circle(overlay, (int(np.average(track_x, weights=weights)), int(
