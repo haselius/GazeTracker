@@ -15,8 +15,8 @@ class EnhancedGazeTracker:
         self.gaze = GazeTrackingMediaPipe()
         self.webcam = cv2.VideoCapture(0)
         self.webcam.set(cv2.CAP_PROP_FPS, 30)  # Set webcam frame rate to 30 FPS
-        self.webcam.set(cv2.CAP_PROP_FRAME_WIDTH, 1920)  # Reduce resolution for faster processing
-        self.webcam.set(cv2.CAP_PROP_FRAME_HEIGHT, 1080)
+        self.webcam.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)  # Reduce resolution for faster processing
+        self.webcam.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
 
         self.screen_width, self.screen_height = 2560, 1440  # Adjust to your display
         self.pause_play_zone = {
@@ -29,9 +29,9 @@ class EnhancedGazeTracker:
 
         # Calibration settings
         self.calibration_points = [
-            (0.2, 0.2), (0.5, 0.2), (0.8, 0.2),
-            (0.2, 0.5), (0.5, 0.5), (0.8, 0.5),
-            (0.2, 0.8), (0.5, 0.8), (0.8, 0.8)
+            (0.1, 0.1), (0.5, 0.1), (0.9, 0.1),
+            (0.1, 0.5), (0.5, 0.5), (0.9, 0.5),
+            (0.1, 0.9), (0.5, 0.9), (0.9, 0.9)
         ]
         self.calibration_data = []
         self.current_calibration_point = 0
@@ -80,9 +80,9 @@ class EnhancedGazeTracker:
         self.x_coeff = np.polyfit(gaze_x, screen_x, 2)
         self.y_coeff = np.polyfit(gaze_y, screen_y, 2)
         self.calibration_complete = True
-        self.coefs = [x_coeff, y_coeff]
+        self.coefs = [self.x_coeff, self.y_coeff]
         print(self.coefs)
-        np.save('calib_data.npz', np.array(self.coefs))
+        # np.save('calib_data.npz', np.array(self.coefs)) # REMOVE IF YOU WANT TO SAVE CALIB DATA
 
     def map_to_screen(self, h_ratio, v_ratio):
         """Map gaze ratios to screen coordinates using calibration"""
@@ -166,11 +166,6 @@ class EnhancedGazeTracker:
             if not ret:
                 # break
                 return
-            camera_matrix = np.array([[400, 0, 540],
-                                      [0, 400, 540],
-                                      [0, 0, 1]])
-            dist_coeffs = np.array([[0, 0, 0, 0, 1]])
-            frame = cv2.undistort(frame, camera_matrix, dist_coeffs)
             self.gaze.refresh(frame)
             frame = self.gaze.annotated_frame()
 

@@ -30,13 +30,13 @@ def getScreenSize():
     return width, height, width_mm, height_mm
 
 def main():
-    tracker = EnhancedGazeTracker()
-    tracker.Calibrun()
+
     dir = "."
     width, height, width_mm, height_mm = getScreenSize()
 
     time_name = datetime.datetime.now().strftime("%I_%M%p_%B_%d_%Y")
-
+    tracker = EnhancedGazeTracker()
+    tracker.Calibrun()
     cv2.namedWindow("over", cv2.WINDOW_NORMAL)
     cv2.setWindowProperty(
         "over", cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN
@@ -79,10 +79,6 @@ def main():
     # cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
     # cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
 
-    camera_matrix = np.array([[400, 0, 540],
-                              [0,400,540],
-                              [0,0,1]])
-    dist_coeffs = np.array([[0,0,0,0,1]])
 
     while cap.isOpened():
         try:

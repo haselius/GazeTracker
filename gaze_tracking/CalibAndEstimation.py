@@ -18,9 +18,9 @@ class EnhancedGazeTracker:
         self.screen_width, self.screen_height = 1920, 1080 #2560, 1440
 
         # Calibration params
-        self.calibration_points = [(0.2, 0.2), (0.5, 0.2), (0.8, 0.2),
-                                   (0.2, 0.5), (0.5, 0.5), (0.8, 0.5),
-                                   (0.2, 0.8), (0.5, 0.8), (0.8, 0.8)]
+        self.calibration_points = [ (0.1, 0.1), (0.5, 0.1), (0.9, 0.1),
+                                    (0.1, 0.5), (0.5, 0.5), (0.9, 0.5),
+                                    (0.1, 0.9), (0.5, 0.9), (0.9, 0.9)]
         self.calibration_data = []
         self.current_calibration_index = 0
         self.calibrating = True
